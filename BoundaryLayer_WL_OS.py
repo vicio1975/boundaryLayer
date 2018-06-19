@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 30/05/2018
+Updated on 19/06/2018
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
@@ -11,8 +11,7 @@ Changes: 1. Removed the moving results file (WIN users)
                         turbulent length scale.
          Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
 .
-         
-Goal: 1. Termal boundary layer implementation
+         5. Termal boundary layer implementation (work in progress)
 
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
@@ -23,8 +22,8 @@ import numpy as num
 #import os
 
 #### Version of the tool
-V = 4   #Main changes 
-Sv = 3  #small changes 
+V = 5   #Main changes 
+Sv = 0  #small changes 
 
 ###################################################Classes declarations
 class physics:
