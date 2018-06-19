@@ -11,8 +11,16 @@ Changes: 1. Removed the moving results file (WIN users)
                         turbulent length scale.
          Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
 .
-         5. Termal boundary layer implementation (work in progress)
-
+         5. Termal boundary layer implementation (work in progress): 
+            Prandtl Number = kinematic_viscosity/thermal_diffusivity = [μ/ρ] / [Kc/(ρ*cp)] = 
+            Prandtl Number = (μ*cp)/Kc 
+            ν : momentum diffusivity (kinematic viscosity), ν = μ/ρ (SI units: m2/s)
+            α : thermal diffusivity, α = Kc/(ρ*cp) (SI units: m2/s)
+            μ : dynamic viscosity, (SI units: Pa s = N s/m2)
+            Kc: thermal conductivity, (SI units: W/m-K)
+            cp: specific heat, (SI units: J/kg-K)
+            ρ : density, (SI units: kg/m3).
+            
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
 """
@@ -51,8 +59,16 @@ class physics:
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
+                
+#Change n. 5 --> thermal diffusivity, α = Kc/(ρ*cp)
+                # -183 < T < 218 C
+                Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2)) # Thermal conductivity
+                cp = 1.004 #specific heat cp = 1.004 kJ/kg.K at 20C 
+                
+                alpha = Kc/(rot*cp)
                 rep = False
-                return [rot,gamma_t,mi,ni]
+                return [rot,gamma_t,mi,ni,alpha]
+
             #Water
             elif self.nameflu == self.fluids[1]:
                 #Kell formulation
