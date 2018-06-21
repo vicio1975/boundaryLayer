@@ -249,7 +249,6 @@ def meshH(Vo,ymin,ymax):
      
      while y1 > ymin:
         Nlrs = Nlrs + 1
-        print("Nl = {} - y1= ".format(Nlrs),y1," - ymin= ", ymin)
         y1 = yref/((Er)**(Nlrs-1))
         Rs = y1/yref #relative size
      print("--> Number of layers close to the wall: {}".format(Nlrs))
