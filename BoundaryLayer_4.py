@@ -49,7 +49,7 @@ class physics:
             if self.nameflu == self.fluids[0]:
                 rot = self.pAtm/(self.Rf*t) #Density as function of temperature [Kg/mc]
                 gamma_t = rot * self.g  #specific weight at t°C
-#small change --> Sutherland Equation
+				#Sutherland Equation
                 ba = 1.458*10**(-6) 
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
@@ -66,7 +66,7 @@ class physics:
                      +(46.17046*10**-6)*(self.T**3.0) + (105.56302*10**-9)*(self.T**4.0)-
                             +(280.54253*10**-12)*(self.T**5.0))/At
                 gamma_t = rot*self.g #specific weight at t°C
-#small change --> Vogel Formula
+				#Vogel Formula
                 # 0<T<100 Celsius
                 c1 = -3.7188
                 c2 = 578.919
@@ -114,7 +114,6 @@ def spec(V,Sv):
     print("--> The kinematic viscosity of {one} is {two:1.4e} m^2/s\n".format(one=fluid.nameflu,two=fluid.prop()[3]))
     return fluid,regionName
 
-## change-2 : Added the selection of geometry duct, circular, rectangular and unregular
 def geom(V0,fluid):
     print("* Flow geometry conditions:")
     ans = "None"
@@ -195,8 +194,6 @@ def geom(V0,fluid):
 
     return dc,RE,FLK
 
-##End change-2
-
 def meshH(Vo,ymin,ymax):
 # Levels of refinement
      print("\n---------------- Mesh Design -----------------")
@@ -228,11 +225,11 @@ def meshH(Vo,ymin,ymax):
      ## Layering of the wall
      Nlrs = 0
      y1 = 999
-#Change4_1 limit the Espansion number
+
      Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
      if Er<1.1: Er=1
      elif Er>1.5: Er=1.5
-#endChange4_1
+
      
      while y1 > ymin:
         Nlrs = Nlrs + 1
@@ -246,7 +243,6 @@ def meshH(Vo,ymin,ymax):
      print("---------------------------------------------")
      return CN,Lo,dt,Lref,yref,y1,Er,Rs,Nlrs
 
-## change-3 : Skin friction estimation for pipe flows
 def calc(fluid,Name,V,Sv):
 
     Cnu = 0.09 #turbulence model constant
@@ -287,8 +283,6 @@ def calc(fluid,Name,V,Sv):
             lamI = lamII
         Cf = lamI
         print("--> Cf = {:4.5f}".format(Cf))
-
-##End change-3
 
     #Shear stress and shear velocity
     tw = 0.5 * fluid.prop()[0] * Cf * num.power(V0, 2) #Wall shear stress
@@ -348,9 +342,7 @@ def calc(fluid,Name,V,Sv):
  
     print("\n>>> Wall mesh treatment")
     yplus_min = float(input("* Set the smallest y+_min =  "))
-#Change 4_2:  yplus_max = yplus_min + 50 it was yplus_max = float(input("* Set the  biggest y+_max =  "))
     yplus_max = yplus_min + 50
-#End Change4_2
     y_min = (yplus_min*fluid.prop()[3])/Uw
     y_max = (yplus_max*fluid.prop()[3])/Uw
     print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
@@ -480,16 +472,8 @@ def calc(fluid,Name,V,Sv):
     data_BC.write("------------------------------------------------------------\n")
     data_BC.close()
 
-    ##change-1 Removed moving report file
-	#Moving file on desktop
-#	DF = os.environ['HOME']
-#	BCfileFD = DF+"/"+"Desktop/"
-#	BCfile_last = BCfileFD+BCfile
-#	if (os.path.isfile(BCfile_last)): os.remove(BCfile_last)
-#	move(BCfile,BCfileFD)	#move the saved file
-
     print("\n ... Estimation completed!\n ... Please find a report file in the code directory\n ... Enjoy your simulation!")
-    ##end change-1
+
 ###########################################################################################################
 
 ############################################################ Main
