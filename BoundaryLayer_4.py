@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 19/06/2018
+Updated on 30/05/2018
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
@@ -11,16 +11,11 @@ Changes: 1. Removed the moving results file (WIN users)
                         turbulent length scale.
          Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
 .
-         5. Termal boundary layer implementation (work in progress): 
-            Prandtl Number = kinematic_viscosity/thermal_diffusivity = [μ/ρ] / [Kc/(ρ*cp)] = 
-            Prandtl Number = (μ*cp)/Kc 
-            ν : momentum diffusivity (kinematic viscosity), ν = μ/ρ (SI units: m2/s)
-            α : thermal diffusivity, α = Kc/(ρ*cp) (SI units: m2/s)
-            μ : dynamic viscosity, (SI units: Pa s = N s/m2)
-            Kc: thermal conductivity, (SI units: W/m-K)
-            cp: specific heat, (SI units: J/kg-K)
-            ρ : density, (SI units: kg/m3).
-            
+         
+Goal: 1. Termal boundary layer implementation
+	  2. GUI
+
+
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
 """
@@ -30,8 +25,8 @@ import numpy as num
 #import os
 
 #### Version of the tool
-V = 5   #Main changes 
-Sv = 0  #small changes 
+V = 4   #Main changes 
+Sv = 3  #small changes 
 
 ###################################################Classes declarations
 class physics:
@@ -59,16 +54,8 @@ class physics:
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
-                
-#Change n. 5 --> thermal diffusivity, α = Kc/(ρ*cp)
-                # -183 < T < 218 C
-                Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2)) # Thermal conductivity
-                cp = 1.004 #specific heat cp = 1.004 kJ/kg.K at 20C 
-                
-                alpha = Kc/(rot*cp)
                 rep = False
-                return [rot,gamma_t,mi,ni,alpha]
-
+                return [rot,gamma_t,mi,ni]
             #Water
             elif self.nameflu == self.fluids[1]:
                 #Kell formulation
@@ -307,14 +294,6 @@ def calc(fluid,Name,V,Sv):
     #Shear stress and shear velocity
     tw = 0.5 * fluid.prop()[0] * Cf * num.power(V0, 2) #Wall shear stress
     Uw = num.power( (tw/fluid.prop()[0]) , 0.5) #Shear velocity
-    print("\n>>> Wall mesh treatment")
-    yplus_min = float(input("* Set the smallest y+_min =  "))
-#    yplus_max = float(input("* Set the  biggest y+_max =  "))
-#Change 4_2:  yplus_max = yplus_min + 50
-    yplus_max = yplus_min + 50
-#End Change4_2
-    y_min = (yplus_min*fluid.prop()[3])/Uw
-    y_max = (yplus_max*fluid.prop()[3])/Uw
     I = 0.16 * num.power(Re,(-1.0/8.0))   #Turbulent intensity (The common choice is I = 0.05)
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
     u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
@@ -329,8 +308,6 @@ def calc(fluid,Name,V,Sv):
         tls = 0.038*CL
         
     print("\n>>> Turbulence free-stream boundary conditions")
-    print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
-    print("--> ymax = {:8.3e} m - wall maximum cell height".format(y_max))
     print("--> d = {} m - Viscous BL thickness".format(l))
     print("--> tw = {:8.3e} Pa*m^-2 - Wall shear stress".format(tw))
     print("--> Uw = {:8.3e} m*s^-1 - Shear Velocity".format(Uw))
@@ -367,6 +344,18 @@ def calc(fluid,Name,V,Sv):
 
     print("--> Inlet Turbulent Energy dissipation epsilon_in = {:5.5f} m^2*s^-3".format(epsilon_inlet))
     print("--> Inlet specific rate of dissipation omega_in = {:5.5f} s^-1".format(omega_inlet))
+
+
+ 
+    print("\n>>> Wall mesh treatment")
+    yplus_min = float(input("* Set the smallest y+_min =  "))
+#Change 4_2:  yplus_max = yplus_min + 50 it was yplus_max = float(input("* Set the  biggest y+_max =  "))
+    yplus_max = yplus_min + 50
+#End Change4_2
+    y_min = (yplus_min*fluid.prop()[3])/Uw
+    y_max = (yplus_max*fluid.prop()[3])/Uw
+    print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
+    print("--> ymax = {:8.3e} m - wall maximum cell height".format(y_max))
     print("\n* Wall treatment options:")
     print("    1. 100 < y+ < 300  - Wall Function")
     print("    2.  50 < y+ < 200  - Scalable Wall Function")
