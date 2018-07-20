@@ -63,7 +63,9 @@ class physics:
 				  #Thermal diffusivity, α = Kc/(ρ*cp)
                 # -183 < T < 218 C
                 Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2)) # Thermal conductivity
-                cp = 1.004 #specific heat cp = 1.004 kJ/kg.K at 20C 
+                cp = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.9917
+                cv = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.7047
+                kt = cp/cv #specific heat cp = 1.004 kJ/kg.K at 20C 
                 
                 alpha = Kc/(rot*cp)
                 rep = False
