@@ -54,13 +54,13 @@ class physics:
             if self.nameflu == self.fluids[0]:
                 rot = self.pAtm/(self.Rf*t) #Density as function of temperature [Kg/mc]
                 gamma_t = rot * self.g  #specific weight at t°C
-				#Sutherland Equation
+				  #Sutherland Equation
                 ba = 1.458*10**(-6) 
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
                 
-				#thermal diffusivity, α = Kc/(ρ*cp)
+				  #Thermal diffusivity, α = Kc/(ρ*cp)
                 # -183 < T < 218 C
                 Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2)) # Thermal conductivity
                 cp = 1.004 #specific heat cp = 1.004 kJ/kg.K at 20C 
