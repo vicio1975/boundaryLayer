@@ -33,4 +33,5 @@ Journal: Australian Journal of Scientific Research, Series A: Physical Sciences,
 - Heat Capacity at constant volume
 https://www.grc.nasa.gov/www/k-12/airplane/specheat.html
 http://thermopedia.com/content/553/ 
-The values up to 1000 K were originally published in "Tables of Thermal Properties of Gases", NBS Circular 564,1955. The last five rows were calculated from a formula by B G Kyle "Chemical and Process Thermodynamics", Englewood Cliffs / Prentice Hall, 1984, and have <1% error.
+The values up to 1000 K were originally published in "Tables of Thermal Properties of Gases", NBS Circular 564,1955.
+The last five rows were calculated from a formula by B G Kyle "Chemical and Process Thermodynamics", Englewood Cliffs / Prentice Hall, 1984, and have <1% error.
