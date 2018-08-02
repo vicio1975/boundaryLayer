@@ -67,10 +67,11 @@ class physics:
                 cv = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.7047
                 kt = cp/cv #specific heat cp = 1.004 kJ/kg.K at 20C 
                 
-                alpha = Kc/(rot*cp)
+                alpha = Kc/(rot*cp) #thermal diffusivity
                 rep = False
-                return [rot,gamma_t,mi,ni,alpha]
+                return [rot,gamma_t,mi,ni,alpha,kt]
 
+###########here on
             #Water
             elif self.nameflu == self.fluids[1]:
                 #Kell formulation
@@ -89,6 +90,9 @@ class physics:
                 mi = (num.e**((c1+(c2/(t+c3)))))/1000 #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
                 rep = False
+                
+                
+                
                 return [rot,gamma_t,mi,ni]
             else:
                 print(" ... please select the correct fluid from the list!")
