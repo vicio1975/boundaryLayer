@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 30/05/2018
+Updated on 19/06/2018
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
@@ -11,11 +11,16 @@ Changes: 1. Removed the moving results file (WIN users)
                         turbulent length scale.
          Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
 .
-         
-Goal: 1. Termal boundary layer implementation
-	  2. GUI
-
-
+         5. Termal boundary layer implementation (work in progress): 
+            Prandtl Number = kinematic_viscosity/thermal_diffusivity = [μ/ρ] / [Kc/(ρ*cp)] = 
+            Prandtl Number = (μ*cp)/Kc 
+            ν : momentum diffusivity (kinematic viscosity), ν = μ/ρ (SI units: m2/s)
+            α : thermal diffusivity, α = Kc/(ρ*cp) (SI units: m2/s)
+            μ : dynamic viscosity, (SI units: Pa s = N s/m2)
+            Kc: thermal conductivity, (SI units: W/m-K)
+            cp: specific heat, (SI units: J/kg-K)
+            ρ : density, (SI units: kg/m3).
+            
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
 """
@@ -25,8 +30,8 @@ import numpy as num
 #import os
 
 #### Version of the tool
-V = 4   #Main changes 
-Sv = 3  #small changes 
+V = 5   #Main changes 
+Sv = 0  #small changes 
 
 ###################################################Classes declarations
 class physics:
@@ -49,13 +54,24 @@ class physics:
             if self.nameflu == self.fluids[0]:
                 rot = self.pAtm/(self.Rf*t) #Density as function of temperature [Kg/mc]
                 gamma_t = rot * self.g  #specific weight at t°C
-				#Sutherland Equation
+				  #Sutherland Equation
                 ba = 1.458*10**(-6) 
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
+                
+				  #Thermal diffusivity, α = Kc/(ρ*cp)
+                # -183 < T < 218 C
+                Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2)) # Thermal conductivity
+                cp = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.9917
+                cv = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.7047
+                kt = cp/cv #specific heat cp = 1.004 kJ/kg.K at 20C 
+                
+                alpha = Kc/(rot*cp) #thermal diffusivity
                 rep = False
-                return [rot,gamma_t,mi,ni]
+                return [rot,gamma_t,mi,ni,alpha,kt]
+
+###########here on
             #Water
             elif self.nameflu == self.fluids[1]:
                 #Kell formulation
@@ -74,6 +90,9 @@ class physics:
                 mi = (num.e**((c1+(c2/(t+c3)))))/1000 #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
                 rep = False
+                
+                
+                
                 return [rot,gamma_t,mi,ni]
             else:
                 print(" ... please select the correct fluid from the list!")
@@ -91,8 +110,7 @@ def spec(V,Sv):
     print("######                                    ver.{}.{} #######".format(V,Sv))
     print("#########################################################")
 
-    regionName = input("\n>>> Set the domain region = ") #Change: Add Domain region name
-
+    regionName = input("\n>>> Set the domain region = ") 
     print("\n---------------- Fluid Specifications -----------------")
 
     fluSel = {'1': 'air', '2': 'water'} #dictionary
@@ -195,7 +213,7 @@ def geom(V0,fluid):
     return dc,RE,FLK
 
 def meshH(Vo,ymin,ymax):
-# Levels of refinement
+	# Levels of refinement
      print("\n---------------- Mesh Design -----------------")
      CN = float(input("* Set the Courant Number (CNF <= 1) = "))
      Lo = float(input("* Set the first level dimension (m) = "))
@@ -229,7 +247,6 @@ def meshH(Vo,ymin,ymax):
      Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
      if Er<1.1: Er=1
      elif Er>1.5: Er=1.5
-
      
      while y1 > ymin:
         Nlrs = Nlrs + 1
@@ -287,6 +304,11 @@ def calc(fluid,Name,V,Sv):
     #Shear stress and shear velocity
     tw = 0.5 * fluid.prop()[0] * Cf * num.power(V0, 2) #Wall shear stress
     Uw = num.power( (tw/fluid.prop()[0]) , 0.5) #Shear velocity
+    print("\n>>> Wall mesh treatment")
+    yplus_min = float(input("* Set the smallest y+_min =  "))
+    yplus_max = yplus_min + 50
+    y_min = (yplus_min*fluid.prop()[3])/Uw
+    y_max = (yplus_max*fluid.prop()[3])/Uw
     I = 0.16 * num.power(Re,(-1.0/8.0))   #Turbulent intensity (The common choice is I = 0.05)
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
     u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
@@ -301,6 +323,8 @@ def calc(fluid,Name,V,Sv):
         tls = 0.038*CL
         
     print("\n>>> Turbulence free-stream boundary conditions")
+    print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
+    print("--> ymax = {:8.3e} m - wall maximum cell height".format(y_max))
     print("--> d = {} m - Viscous BL thickness".format(l))
     print("--> tw = {:8.3e} Pa*m^-2 - Wall shear stress".format(tw))
     print("--> Uw = {:8.3e} m*s^-1 - Shear Velocity".format(Uw))
@@ -337,16 +361,6 @@ def calc(fluid,Name,V,Sv):
 
     print("--> Inlet Turbulent Energy dissipation epsilon_in = {:5.5f} m^2*s^-3".format(epsilon_inlet))
     print("--> Inlet specific rate of dissipation omega_in = {:5.5f} s^-1".format(omega_inlet))
-
-
- 
-    print("\n>>> Wall mesh treatment")
-    yplus_min = float(input("* Set the smallest y+_min =  "))
-    yplus_max = yplus_min + 50
-    y_min = (yplus_min*fluid.prop()[3])/Uw
-    y_max = (yplus_max*fluid.prop()[3])/Uw
-    print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
-    print("--> ymax = {:8.3e} m - wall maximum cell height".format(y_max))
     print("\n* Wall treatment options:")
     print("    1. 100 < y+ < 300  - Wall Function")
     print("    2.  50 < y+ < 200  - Scalable Wall Function")
@@ -473,7 +487,6 @@ def calc(fluid,Name,V,Sv):
     data_BC.close()
 
     print("\n ... Estimation completed!\n ... Please find a report file in the code directory\n ... Enjoy your simulation!")
-
 ###########################################################################################################
 
 ############################################################ Main
