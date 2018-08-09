@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 19/06/2018
+Updated on 09/08/2018
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
