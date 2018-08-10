@@ -223,12 +223,24 @@ def geom(V0,fluid):
             ans = "None"
             print("... wrong selection!")
 
+
     RE = V0 * (dc/fluid.prop()[3])
+
+    ##Change 1.
+    if RE >= 3000:
+        d1 = 0.37
+        d2 = 1/5
+    elif RE < 3000:
+        d1 = 4.91
+        d2 = 1/2
+    delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
+
     print("\n--> The characteristic lenght scale is {:5.6f} m".format(dc) )
     print("--> The Reynolds number is {:1.5e}".format(RE))
 
-    return dc,RE,FLK
-
+    return dc,RE,FLK,delta
+    ####End Change1.
+    
 def meshH(Vo,ymin,ymax):
 	# Levels of refinement
      print("\n---------------- Mesh Design -----------------")
@@ -283,7 +295,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     print("\n---------------- Flow Velocity Field -----------------\n")
     V0 = float(input("* Set the free stream velocity [m/s]: "))
 
-    CL,Re,FLK = geom(V0,fluid) #Geometry function calling
+    CL,Re,FLK,delta = geom(V0,fluid) #Geometry function calling
     
     ####add a list for an exstended list of values
     eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
@@ -330,20 +342,21 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     I = 0.16 * num.power(Re,(-1.0/8.0))   #Turbulent intensity (The common choice is I = 0.05)
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
     u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
-    l = 11.5 * (fluid.prop()[3]/Uw)          #Viscous BL thickness
-    wall_dist = 2*l     #Wall distance
+    #change 2
+#    l = 11.5 * (fluid.prop()[3]/Uw)          #Viscous BL thickness
+#    wall_dist = 2*l     #Wall distance
 
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
     if (FLK == "ext") :
-        tls = 0.4*l
+        tls = 0.4*delta
     if (FLK == "int") :
         tls = 0.038*CL
         
     print("\n>>> Turbulence free-stream boundary conditions")
     print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
     print("--> ymax = {:8.3e} m - wall maximum cell height".format(y_max))
-    print("--> d = {} m - Viscous BL thickness".format(l))
+    print("--> d = {} m - Viscous BL thickness".format(delta))
     print("--> tw = {:8.3e} Pa*m^-2 - Wall shear stress".format(tw))
     print("--> Uw = {:8.3e} m*s^-1 - Shear Velocity".format(Uw))
     print("--> I = {:4.4f} (-) - Turbulent intensity ".format(I))
