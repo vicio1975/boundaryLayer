@@ -14,6 +14,19 @@ Once the Shear stress and shear velocity are estimated, the Turbulence free-stre
 A Mesh design is proposed according to the selected wall treatment (wall function, scalable wall function and fully resolved wall).
 The code write the results on a text file.
 
+~~~~
+
+Termal boundary layer implementation (work in progress):
+	Prandtl Number = kinematic_viscosity/thermal_diffusivity = [mi/ro] / [Kc/(ro*cp)] = 
+     Prandtl Number = (mi*cp)/Kc 
+     ni : momentum diffusivity (kinematic viscosity), ni = mi/ro (SI units: m2/s)
+     alfa : thermal diffusivity, alfa = Kc/(ro*cp) (SI units: m2/s)
+     mi : dynamic viscosity, (SI units: Pa s = N s/m2)
+     Kc: thermal conductivity, (SI units: W/m-K)
+     cp: specific heat, (SI units: J/kg-K)
+     ro : density, (SI units: kg/m3).
+
+
 
 Bibliography
 
@@ -35,3 +48,5 @@ https://www.grc.nasa.gov/www/k-12/airplane/specheat.html
 http://thermopedia.com/content/553/ 
 The values up to 1000 K were originally published in "Tables of Thermal Properties of Gases", NBS Circular 564,1955.
 The last five rows were calculated from a formula by B G Kyle "Chemical and Process Thermodynamics", Englewood Cliffs / Prentice Hall, 1984, and have <1% error.
+
+- 2006 ASHRAE Handbook—Refrigeration (SI) - Table 2 - Thermal Property Models for Water and Ice (?40 ? t ? 150°C) - Choi and Okos (1986)
