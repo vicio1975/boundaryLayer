@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 09/08/2018
+Updated on 11/08/2018
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
@@ -145,8 +145,6 @@ def spec(V,Sv):
         print("--> Prandtl Number > 1 ==> Velocity BL > Thermal BL \n")
     else:
         print("--> Prandtl Number < 1 ==> Velocity BL < Thermal BL \n")
-        
-    
     return fluid,regionName
 
 def geom(V0,fluid):
@@ -167,17 +165,31 @@ def geom(V0,fluid):
             if ansS == 1:
                 dc = float(input("* Set duct diameter (m): "))
                 L  = float(input("* Set the duct lenght (m): "))
-                if L < 10*dc:#extended range
-                    dc = L
-                    print("--> The boundary layer is not fully developed")
-                elif L >= 10*dc and L <= 60*dc: #extended range
-                    print("--> The confined flow in a transition regime")
-                    RE_0 = V0 * (dc/fluid.prop()[3])
-                    if RE_0 <= 3000:
-                        dc = L
+                RE_0 = V0 * (dc/fluid.prop()[3])
+                if RE_0 < 3000:
+                    Lh  = 0.05 * RE_0 * dc
+                    if L < Lh:
                         print("--> The boundary layer is not fully developed")
-                    elif RE_0 > 3000:
+                        dc = L
+                    else:
                         print("--> The boundary layer is developed")
+                        
+                elif RE_0 > 3000 and RE_0 < 10000:
+                    Lh  = 4 * dc * RE_0**(1/6)
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+
+                elif RE_0 > 10000:
+                    Lh  = 40 * dc #Nikuradse
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                                        
 
             ## case 2. Rectangular section
             if ansS == 2:
