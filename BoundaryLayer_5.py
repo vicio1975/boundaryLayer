@@ -156,11 +156,28 @@ def geom(V0,fluid):
             FLK = "ext"
             #### Free stream
             dc = float(input("* Set the lenght scale: "))
+            RE = V0 * (dc/fluid.prop()[3])
+            #Hansen(1928)
+            if RE < 3.2*10**5:
+                print("--> Laminar Regime")
+                d1 = 4.91
+                d2 = 1/2
+                delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
+                print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
 
+            if RE >= 3.2*10**5:
+                print("--> Turbulent Regime")
+                d1 = 0.37
+                d2 = 1/5
+                delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
+                print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
+                
+                
         elif ans == 2:
             FLK = "int"
             #### Confined Flows
             ansS = int(input("    1. Circular Duct\n    2. Rectangular Duct\n    3. Unregular shape\n* Set the duct geometry [1-2-3]: "))
+
             ## case 1. Circular section
             if ansS == 1:
                 dc = float(input("* Set duct diameter (m): "))
@@ -190,7 +207,6 @@ def geom(V0,fluid):
                     else:
                         print("--> The boundary layer is developed")
                                         
-
             ## case 2. Rectangular section
             if ansS == 2:
                 sA = float(input("* Set the width (m): "))
@@ -200,16 +216,28 @@ def geom(V0,fluid):
                 dc = 4 * (Ar/Pr) #hydraulic diameter
                 L  = float(input("* Set the duct lenght (m): "))
                 #Check of the boundary layer development
-                if L < 10*dc: #extended range
-                    dc = L
-                    print("--> The boundary layer is not fully developed")
-                elif L >= 10*dc and L <= 60*dc: #extended range
-                    print("--> The confined flow in a transition regime")
-                    RE_0 = V0 * (dc/fluid.prop()[3])
-                    if RE_0 <= 3000:
-                        dc = L
+                if RE_0 < 3000:
+                    Lh  = 0.05 * RE_0 * dc
+                    if L < Lh:
                         print("--> The boundary layer is not fully developed")
-                    elif RE_0 > 3000:
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                        
+                elif RE_0 > 3000 and RE_0 < 10000:
+                    Lh  = 4 * dc * RE_0**(1/6)
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+
+                elif RE_0 > 10000:
+                    Lh  = 40 * dc #Nikuradse
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
                         print("--> The boundary layer is developed")
 
            ## case 3. Unregular shape
@@ -219,39 +247,42 @@ def geom(V0,fluid):
                 dc = 4 * (Ar/Pr) #hydraulic diameter
                 L  = float(input("* Set the duct lenght (m): "))
                 #Check of the boundary layer development
-                if L < 10*dc: #extended range
-                    dc = L
-                    print("--> The boundary layer is not fully developed")
-                elif L >= 10*dc and L <= 60*dc: #extended range
-                    print("--> The confined flow in a transition regime")
-                    RE_0 = V0 * (dc/fluid.prop()[3])
-                    if RE_0 <= 3000:
-                        dc = L
+                if RE_0 <= 2300:
+                    Lh  = 0.05 * RE_0 * dc #Kays and Crawford (1993) and Shah and Bhatti (1987)
+                    if L < Lh:
                         print("--> The boundary layer is not fully developed")
-                    elif RE_0 > 3000:
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                        
+                elif RE_0 > 2300 and RE_0 < 10000:
+                    Lh  = 1.359 * dc * RE_0**(1/4) #Bhatti and Shah (1987) and Zhi-qing (1982)
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
                         print("--> The boundary layer is developed")
 
+                elif RE_0 > 10000:
+                    Lh  = 10 * dc 
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+        
+            RE = V0 * (dc/fluid.prop()[3])
+                 
+            ###Inserire i casi
         else:
             ans = "None"
             print("... wrong selection!")
-
-
-    RE = V0 * (dc/fluid.prop()[3])
-
-    ##Change 1.
-    if RE >= 3000:
-        d1 = 0.37
-        d2 = 1/5
-    elif RE < 3000:
-        d1 = 4.91
-        d2 = 1/2
-    delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
 
     print("\n--> The characteristic lenght scale is {:5.6f} m".format(dc) )
     print("--> The Reynolds number is {:1.5e}".format(RE))
 
     return dc,RE,FLK,delta
-    ####End Change1.
+
     
 def meshH(Vo,ymin,ymax):
 	# Levels of refinement
@@ -302,7 +333,6 @@ def meshH(Vo,ymin,ymax):
      return CN,Lo,dt,Lref,yref,y1,Er,Rs,Nlrs
 
 def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class 
-
     Cnu = 0.09 #turbulence model constant
     print("\n---------------- Flow Velocity Field -----------------\n")
     V0 = float(input("* Set the free stream velocity [m/s]: "))
@@ -314,13 +344,13 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     eps = eps * 1e-3 # absolute wall roughness
 
     if (FLK == "ext") :
-        if  (Re < 2.0*num.power(10.0, 3.0)):
-            print(">>> Streamline Flow [Re < 2000]: Blausius Skin friction coefficient")
-            Cf = 1.328*num.power(Re,-0.5) #Skin-friction coefficient - laminar
-            print("--> Cf = 1.328*(Re)^-0.5 = {:4.5f}\n".format(Cf))
-        elif (Re < num.power(10.0,9.0)) and (Re > 2.0*num.power(10.0,3.0)):
+        if  (Re < num.power(10, 5)):
+            print(">>> Streamline Flow [Re < 100000]: Blausius Skin friction coefficient")
+            Cf = 0.664 * num.power(Re, -0.5) #Skin-friction coefficient - laminar
+            print("--> Cf = 0.664*(Re)^-0.5 = {:4.5f}\n".format(Cf))
+        elif (Re >= num.power(10, 5)):
             print(">>> Turbulent Flow [2000 < Re < 10^9]: Schlichting skin-friction coefficient")
-            Cf = num.power(((2.0*num.log10(Re))-0.65),-2.3)
+            Cf = num.power(((2 * num.log10(Re))-0.65), -2.3)
             print("--> Cf = (2*log10(Re)-0.65)^(-2.3) = {:4.5f}\n".format(Cf))
 
     if (FLK == "int") :
@@ -354,9 +384,11 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     I = 0.16 * num.power(Re,(-1.0/8.0))   #Turbulent intensity (The common choice is I = 0.05)
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
     u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
-    #change 2
-#    l = 11.5 * (fluid.prop()[3]/Uw)          #Viscous BL thickness
-#    wall_dist = 2*l     #Wall distance
+
+#    #change 2
+#    lv = 5 * (fluid.prop()[3]/Uw)          #Turbulent BL thickness
+#    lb = 11.5 * (fluid.prop()[3]/Uw)          #Turbulent BL thickness
+#    lt = 11.5 * (fluid.prop()[3]/Uw)          #Turbulent BL thickness
 
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
@@ -492,7 +524,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     data_BC.write("ymin = {:1.5e} m - First cell in boundary layer ymin \n".format(y_min))
     data_BC.write("ymax = {:1.5e} m - Last cell in boundary layer ymax \n".format(y_max))
     data_BC.write("l = {:1.5e} m - Viscous BL thickness \n".format(l))
-    data_BC.write("wallDist = {:1.4e} m - Wall distance\n\n".format(wall_dist))
+#    data_BC.write("wallDist = {:1.4e} m - Wall distance\n\n".format(wall_dist))
 
     data_BC.write("tw = {:5.5e} Pa*m^-2 - Wall shear stress\n".format(tw))
     data_BC.write("Uw = {:5.5f} m*s^-1 - Shear Velocity\n".format(Uw))
