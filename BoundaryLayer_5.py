@@ -136,15 +136,15 @@ def spec(V,Sv):
     print("--> The density of {one} is {two:1.4f} Kg/m^3".format(one=fluid.nameflu,two = fluid.prop()[0]))
     print("--> The specific  volume of {one} is {two:1.2f} N/m^3".format(one=(fluid.nameflu),two=fluid.prop()[1]))
     print("--> The dinamic   viscosity of {one} is {two:1.4e} Pa*s".format(one=fluid.nameflu,two=fluid.prop()[2]))
-    print("--> The kinematic viscosity of {one} is {two:1.4e} m^2/s\n".format(one=fluid.nameflu,two=fluid.prop()[3]))
+    print("--> The kinematic viscosity of {one} is {two:1.4e} m^2/s".format(one=fluid.nameflu,two=fluid.prop()[3]))
     #Thermal 
-    print("--> The thermal diffusivity of {one} is {two:1.4e} m^2/s\n".format(one=fluid.nameflu,two=fluid.prop()[4]))
-    print("--> The Prandtl Number of {one} is {two:1.4e} m^2/s\n".format(one=fluid.nameflu,two=fluid.prop()[5]))
+    print("--> The thermal diffusivity of {one} is {two:1.4e} m^2/s".format(one=fluid.nameflu,two=fluid.prop()[4]))
+    print("--> The Prandtl Number of {one} is {two:1.4e} m^2/s".format(one=fluid.nameflu,two=fluid.prop()[5]))
     prn = fluid.prop()[5]
     if prn > 1:
-        print("--> Prandtl Number > 1 ==> Velocity BL > Thermal BL \n")
+        print("--> Prandtl Number > 1 ==> Velocity BL > Thermal BL")
     else:
-        print("--> Prandtl Number < 1 ==> Velocity BL < Thermal BL \n")
+        print("--> Prandtl Number < 1 ==> Velocity BL < Thermal BL")
     return fluid,regionName
 
 def geom(V0,fluid):
@@ -272,8 +272,7 @@ def geom(V0,fluid):
                         print("--> The boundary layer is developed")
         
             RE = V0 * (dc/fluid.prop()[3])
-                 
-            ###Inserire i casi
+            delta = dc/2
         else:
             ans = "None"
             print("... wrong selection!")
@@ -288,7 +287,7 @@ def meshH(Vo,ymin,ymax):
 	# Levels of refinement
      print("\n---------------- Mesh Design -----------------")
      CN = float(input("* Set the Courant Number (CNF <= 1) = "))
-     Lo = float(input("* Set the first level dimension (m) = "))
+     Lo = float(input("* Set the base mesh level dimension (m) = "))
      dt = Lo*CN / Vo
      print("--> The time discretization dt = {:1.3e} sec".format(dt))
      print("* Set the rate of refinement: ")
@@ -339,10 +338,6 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
 
     CL,Re,FLK,delta = geom(V0,fluid) #Geometry function calling
     
-    ####add a list for an exstended list of values
-    eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
-    eps = eps * 1e-3 # absolute wall roughness
-
     if (FLK == "ext") :
         if  (Re < num.power(10, 5)):
             print(">>> Streamline Flow [Re < 100000]: Blausius Skin friction coefficient")
@@ -354,6 +349,8 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
             print("--> Cf = (2*log10(Re)-0.65)^(-2.3) = {:4.5f}\n".format(Cf))
 
     if (FLK == "int") :
+        eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
+        eps = eps * 1e-3 # absolute wall roughness
         #Estimation of the friction factor by Colebrook-White formula
         print(">>> Colebrook-White friction coefficient")
         # Iterative procedure
@@ -385,16 +382,13 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
     u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
 
-#    #change 2
-#    lv = 5 * (fluid.prop()[3]/Uw)          #Turbulent BL thickness
-#    lb = 11.5 * (fluid.prop()[3]/Uw)          #Turbulent BL thickness
-#    lt = 11.5 * (fluid.prop()[3]/Uw)          #Turbulent BL thickness
-
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
     if (FLK == "ext") :
         tls = 0.4*delta
+        #delta estimated in the geom function
     if (FLK == "int") :
+        delta = 11.6 * (fluid.prop()[3]/Uw) #Turbulent BL thickness
         tls = 0.038*CL
         
     print("\n>>> Turbulence free-stream boundary conditions")
@@ -407,6 +401,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     print("--> K = {:4.4f} m^2*s^-2 - Turbulent Kinetic Energy".format(K))
     print("--> u' = {:4.4f} m*s^-1 - Turbulent velocity fluctuation".format(u))
     print("\n>>> Epsilon and Omega - Turbulence dissipation")
+
     epsilon_min = Cnu*num.power(K,1.5)/tls # min turbulence dissipation
     epsilon_max = num.power(Cnu,(3.0/4.0))*num.power(K,1.5)/tls #max turbulence dissipation
     E = (epsilon_min + epsilon_max)/2     #averaged dissipation range
@@ -523,8 +518,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     data_BC.write("------------------- Turbulent characteristics --------------\n")
     data_BC.write("ymin = {:1.5e} m - First cell in boundary layer ymin \n".format(y_min))
     data_BC.write("ymax = {:1.5e} m - Last cell in boundary layer ymax \n".format(y_max))
-    data_BC.write("l = {:1.5e} m - Viscous BL thickness \n".format(l))
-#    data_BC.write("wallDist = {:1.4e} m - Wall distance\n\n".format(wall_dist))
+    data_BC.write("l = {:1.5e} m - BL thickness \n".format(delta))
 
     data_BC.write("tw = {:5.5e} Pa*m^-2 - Wall shear stress\n".format(tw))
     data_BC.write("Uw = {:5.5f} m*s^-1 - Shear Velocity\n".format(Uw))
