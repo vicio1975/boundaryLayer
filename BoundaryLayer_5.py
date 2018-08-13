@@ -159,13 +159,13 @@ def geom(V0,fluid):
             dc = float(input("* Set the lenght scale: "))
             RE = V0 * (dc/fluid.prop()[3])
             #Hansen(1928) approach
-            if RE < 3.2*10**5:
+            if RE < 5*10**5:
                 print("--> Laminar Regime")
                 d1 = 4.91
                 d2 = 1/2
                 delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
                 print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
-            elif RE >= 3.2*10**5:
+            elif RE >= 5*10**5:
                 print("--> Turbulent Regime")
                 d1 = 0.37
                 d2 = 1/5
@@ -334,7 +334,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     CL,Re,FLK,delta = geom(V0,fluid) #Geometry function calling
     
     if (FLK == "ext") :
-        if  (Re < num.power(10, 5)):
+        if  Re < num.power(10, 5):
             print(">>> Streamline Flow [Re < 100000]: Blausius Skin friction coefficient")
             Cf = 0.664 * num.power(Re, -0.5) #Skin-friction coefficient - laminar
             print("--> Cf = 0.664*(Re)^-0.5 = {:4.5f}\n".format(Cf))
@@ -343,7 +343,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
             Cf = num.power(((2 * num.log10(Re))-0.65), -2.3)
             print("--> Cf = (2*log10(Re)-0.65)^(-2.3) = {:4.5f}\n".format(Cf))
 
-    if (FLK == "int") :
+    if FLK == "int":
         eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
         eps = eps * 1e-3 # absolute wall roughness
         #Estimation of the friction factor by Colebrook-White formula
@@ -379,10 +379,18 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
 
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
-    if (FLK == "ext"):
+    if FLK == "ext":
         tls = 0.4*delta
         #delta estimated in the geom function
-    if (FLK == "int"):
+        if Re <= 5*10**5:
+            delta_t = delta * (fluid.prop()[5])**(1/3) 
+            print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
+        elif Re > 5*10**5:
+           delta_t = delta
+           print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
+    ##Da salvare sul file!
+    ##Da qui!!!!        
+    elif FLK == "int":
         #delta estimated using the shear stress
         delta = 11.6 * (fluid.prop()[3]/Uw) #Turbulent BL thickness
         tls = 0.038*CL
