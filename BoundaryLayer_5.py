@@ -499,7 +499,9 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     data_BC.write("The density is {:6.3f} Kg/m^3 \n".format(fluid.prop()[0]))
     data_BC.write("The specific volume is {:8.2f} N/m^3 \n".format(fluid.prop()[1]))
     data_BC.write("The dinamic viscosity is {:2.4e} Pa*s \n".format(fluid.prop()[2]))
-    data_BC.write("The kinematic viscosity is {:2.4e} m^2/s \n".format(fluid.prop()[3]))
+    data_BC.write("The Kinematic viscosity is {:2.4e} m^2/s \n".format(fluid.prop()[3]))
+    data_BC.write("The Thermal diffusivity {:2.4e} m^2/s \n".format(fluid.prop()[4]))
+    data_BC.write("Prandtl number is {:2.4e}\n".format(fluid.prop()[5]))
     data_BC.write("------------------------------------------------------------\n\n")
 
     data_BC.write("------------------------------------------------------------\n")
@@ -514,7 +516,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     data_BC.write("------------------- Turbulent characteristics --------------\n")
     data_BC.write("ymin = {:1.5e} m - First cell in boundary layer ymin \n".format(y_min))
     data_BC.write("ymax = {:1.5e} m - Last cell in boundary layer ymax \n".format(y_max))
-    data_BC.write("l = {:1.5e} m - BL thickness \n".format(delta))
+    data_BC.write("delta = {:1.5e} m - BL thickness \n".format(delta))
 
     data_BC.write("tw = {:5.5e} Pa*m^-2 - Wall shear stress\n".format(tw))
     data_BC.write("Uw = {:5.5f} m*s^-1 - Shear Velocity\n".format(Uw))
