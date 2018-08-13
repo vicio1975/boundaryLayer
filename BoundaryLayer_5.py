@@ -9,8 +9,8 @@ Changes: 1. Removed the moving results file (WIN users)
          4. Limit the Espansion number and the yplus_max number as "yplus_min + 50"
          Small changes(3): mesh details in text, format text, unregular geoms, Region Name, versions
                         turbulent length scale.
-         Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
-.
+         Small changes(4):   air viscosity estimation "Sutherland Equation",
+         Vogel water viscosity estimation.
          5. Termal boundary layer implementation (work in progress): 
             Prandtl Number = kinematic_viscosity/thermal_diffusivity = [μ/ρ] / [Kc/(ρ*cp)] = 
             Prandtl Number = (μ*cp)/Kc 
@@ -20,6 +20,7 @@ Changes: 1. Removed the moving results file (WIN users)
             Kc: thermal conductivity, (SI units: W/m-K)
             cp: specific heat, (SI units: J/kg-K)
             ρ : density, (SI units: kg/m3).
+            1. boundary layer improvemnt estimation
             
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
@@ -32,7 +33,6 @@ import numpy as num
 #### Version of the tool
 V = 5   #Main changes 
 Sv = 0  #small changes 
-
 ###################################################Classes declarations
 class physics:
     fluids = ['air','water']
@@ -49,7 +49,7 @@ class physics:
     def prop(self):
         t = self.T + 273.17 # Kelvin
         rep = True
-        while (rep == True):
+        while rep == True:
             #Air
             if self.nameflu == self.fluids[0]:
                 rot = self.pAtm/(self.Rf*t) #Density as function of temperature [Kg/mc]
@@ -152,32 +152,31 @@ def geom(V0,fluid):
     ans = "None"
     while ans == "None":
         ans = int(input("    1. External Flow\n    2. Confined Flow\n* Set flow geometry [1-2]: "))
+
+        #### Free stream
         if ans == 1:
             FLK = "ext"
-            #### Free stream
             dc = float(input("* Set the lenght scale: "))
             RE = V0 * (dc/fluid.prop()[3])
-            #Hansen(1928)
+            #Hansen(1928) approach
             if RE < 3.2*10**5:
                 print("--> Laminar Regime")
                 d1 = 4.91
                 d2 = 1/2
                 delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
                 print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
-
-            if RE >= 3.2*10**5:
+            elif RE >= 3.2*10**5:
                 print("--> Turbulent Regime")
                 d1 = 0.37
                 d2 = 1/5
                 delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
                 print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
-                
-                
+            ### delta is estimated
+            
+        #### Confined Flows
         elif ans == 2:
             FLK = "int"
-            #### Confined Flows
             ansS = int(input("    1. Circular Duct\n    2. Rectangular Duct\n    3. Unregular shape\n* Set the duct geometry [1-2-3]: "))
-
             ## case 1. Circular section
             if ansS == 1:
                 dc = float(input("* Set duct diameter (m): "))
@@ -273,15 +272,13 @@ def geom(V0,fluid):
         
             RE = V0 * (dc/fluid.prop()[3])
             delta = dc/2
+            #delta will be updated once the wall shear stress is estimated
         else:
             ans = "None"
             print("... wrong selection!")
-
     print("\n--> The characteristic lenght scale is {:5.6f} m".format(dc) )
     print("--> The Reynolds number is {:1.5e}".format(RE))
-
     return dc,RE,FLK,delta
-
     
 def meshH(Vo,ymin,ymax):
 	# Levels of refinement
@@ -314,11 +311,10 @@ def meshH(Vo,ymin,ymax):
      ## Layering of the wall
      Nlrs = 0
      y1 = 999
-
      Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
      if Er<1.1: Er=1
      elif Er>1.5: Er=1.5
-     
+    
      while y1 > ymin:
         Nlrs = Nlrs + 1
         y1 = yref/((Er)**(Nlrs-1))
@@ -326,7 +322,6 @@ def meshH(Vo,ymin,ymax):
      print("--> Number of layers close to the wall: {}".format(Nlrs))
      print("--> The Relative size is {}".format(Rs))
      print("--> First cell size is {}".format(y1))
-
      print("\n---------------------------------------------")
      print("---------------------------------------------")
      return CN,Lo,dt,Lref,yref,y1,Er,Rs,Nlrs
@@ -384,10 +379,11 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
 
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
-    if (FLK == "ext") :
+    if (FLK == "ext"):
         tls = 0.4*delta
         #delta estimated in the geom function
-    if (FLK == "int") :
+    if (FLK == "int"):
+        #delta estimated using the shear stress
         delta = 11.6 * (fluid.prop()[3]/Uw) #Turbulent BL thickness
         tls = 0.038*CL
         
@@ -561,7 +557,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
 
 ######################################################################## MAIN
 F,Name = spec(V,Sv)      #fluid specification function -  F is an object of the class physics
-a = calc(F,Name,V,Sv)    #Flow field and Turb. estimation function
+calc(F,Name,V,Sv)    #Flow field and Turb. estimation function
 
 input("\n\n >>> Press a key to exit!")
 ##################################################################### END MAIN
