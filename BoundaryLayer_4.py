@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 19/06/2018
+Updated on 11/08/2018
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
@@ -9,7 +9,34 @@ Changes: 1. Removed the moving results file (WIN users)
          4. Limit the Espansion number and the yplus_max number as "yplus_min + 50"
          Small changes(3): mesh details in text, format text, unregular geoms, Region Name, versions
                         turbulent length scale.
+<<<<<<< HEAD:BoundaryLayer_4.py
          Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
+||||||| merged common ancestors
+         Small changes(4):   air viscosity estimation "Sutherland Equation", Vogel water viscosity estimation
+.
+         5. Termal boundary layer implementation (work in progress): 
+            Prandtl Number = kinematic_viscosity/thermal_diffusivity = [μ/ρ] / [Kc/(ρ*cp)] = 
+            Prandtl Number = (μ*cp)/Kc 
+            ν : momentum diffusivity (kinematic viscosity), ν = μ/ρ (SI units: m2/s)
+            α : thermal diffusivity, α = Kc/(ρ*cp) (SI units: m2/s)
+            μ : dynamic viscosity, (SI units: Pa s = N s/m2)
+            Kc: thermal conductivity, (SI units: W/m-K)
+            cp: specific heat, (SI units: J/kg-K)
+            ρ : density, (SI units: kg/m3).
+=======
+         Small changes(4):   air viscosity estimation "Sutherland Equation",
+         Vogel water viscosity estimation.
+         5. Termal boundary layer implementation (work in progress): 
+            Prandtl Number = kinematic_viscosity/thermal_diffusivity = [μ/ρ] / [Kc/(ρ*cp)] = 
+            Prandtl Number = (μ*cp)/Kc 
+            ν : momentum diffusivity (kinematic viscosity), ν = μ/ρ (SI units: m2/s)
+            α : thermal diffusivity, α = Kc/(ρ*cp) (SI units: m2/s)
+            μ : dynamic viscosity, (SI units: Pa s = N s/m2)
+            Kc: thermal conductivity, (SI units: W/m-K)
+            cp: specific heat, (SI units: J/kg-K)
+            ρ : density, (SI units: kg/m3).
+            1. boundary layer improvemnt estimation
+>>>>>>> Thermal:BoundaryLayer_5.py
             
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
@@ -20,9 +47,18 @@ import numpy as num
 #import os
 
 #### Version of the tool
+<<<<<<< HEAD:BoundaryLayer_4.py
 V = 4   #Main changes 
 Sv = 4  #small changes 
 
+||||||| merged common ancestors
+V = 5   #Main changes 
+Sv = 0  #small changes 
+
+=======
+V = 5   #Main changes 
+Sv = 0  #small changes 
+>>>>>>> Thermal:BoundaryLayer_5.py
 ###################################################Classes declarations
 class physics:
     fluids = ['air','water']
@@ -39,7 +75,7 @@ class physics:
     def prop(self):
         t = self.T + 273.17 # Kelvin
         rep = True
-        while (rep == True):
+        while rep == True:
             #Air
             if self.nameflu == self.fluids[0]:
                 rot = self.pAtm/(self.Rf*t) #Density as function of temperature [Kg/mc]
@@ -49,14 +85,47 @@ class physics:
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
+<<<<<<< HEAD:BoundaryLayer_4.py
+||||||| merged common ancestors
+                
+				  #Thermal diffusivity, α = Kc/(ρ*cp)
+                # -183 < T < 218 C
+                Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2)) # Thermal conductivity
+                cp = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.9917
+                cv = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.7047
+                kt = cp/cv #specific heat cp = 1.004 kJ/kg.K at 20C 
+                
+                alpha = Kc/(rot*cp) #thermal diffusivity
+=======
+                
+				  #Thermal diffusivity, α = Kc/(ρ*cp)
+                # -183 < T < 218 C
+                #Thermal conductivity
+                Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2))
+                #Specific heat
+                cp = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.9917
+                #cv = (-10**-10*(self.T)**3) + ( 3*10**-7*(self.T)**2 ) - (5*10**-5*(self.T)) + 0.7047
+                #thermal diffusivity
+                alpha = Kc/(rot*cp) 
+                PrN = ni/alpha
+>>>>>>> Thermal:BoundaryLayer_5.py
                 rep = False
+<<<<<<< HEAD:BoundaryLayer_4.py
                 return [rot,gamma_t,mi,ni]
+||||||| merged common ancestors
+                return [rot,gamma_t,mi,ni,alpha,kt]
+
+###########here on
+=======
+                return [rot,gamma_t,mi,ni,alpha,PrN]
+>>>>>>> Thermal:BoundaryLayer_5.py
             #Water
             elif self.nameflu == self.fluids[1]:
                 #Kell formulation
                 ro = 999.83952
                 At = 1 + (16.879850*10**-3)*self.T #constant to be used in the Kell formula
-                    #rot is the water density as function of temperature [Kg/mc]
+
+                #rot is the water density as function of temperature [Kg/mc]
                 rot =  (ro + (16.945176*self.T) - (7.987040*10**-3)*(self.T**2.0) -
                      +(46.17046*10**-6)*(self.T**3.0) + (105.56302*10**-9)*(self.T**4.0)-
                             +(280.54253*10**-12)*(self.T**5.0))/At
@@ -68,8 +137,25 @@ class physics:
                 c3 = -137.546                 
                 mi = (num.e**((c1+(c2/(t+c3)))))/1000 #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
+
+                #Thermal conductivity
+                Kc = 5.7109 * (10**-1) + 1.7625 * (10**-3) * self.T - 6.7036 * 10**(-6) * (self.T **2)
+                #Thermal Diffusivity
+                alpha = 1.3168 * (10**-7) + 6.2477 * (10**-10) * self.T - 2.4022 * (10**-12) * (self.T**2)
+                #Specific heat
+                cp = Kc/(rot*alpha)
+                PrN = ni/alpha
                 rep = False
+<<<<<<< HEAD:BoundaryLayer_4.py
                 return [rot,gamma_t,mi,ni]
+||||||| merged common ancestors
+                
+                
+                
+                return [rot,gamma_t,mi,ni]
+=======
+                return [rot,gamma_t,mi,ni,alpha,PrN]
+>>>>>>> Thermal:BoundaryLayer_5.py
             else:
                 print(" ... please select the correct fluid from the list!")
                 rep = True
@@ -99,13 +185,22 @@ def spec(V,Sv):
         if flu == "None": print("... fluid not yet implemented!")
 
     fluid = physics(flu) # create the object fluid
+    #Fluid vars out --> [0-rot, 1-gamma_t, 2-mi, 3-ni, 4-alpha, 5-PrN]
 
     fluid.T = float(input("* Set the operating temperature (-30 C < T < 150 C): "))
     print("\n--> The {one} has a temperature T = {two} [C]".format(one=fluid.nameflu,two=fluid.T))
     print("--> The density of {one} is {two:1.4f} Kg/m^3".format(one=fluid.nameflu,two = fluid.prop()[0]))
     print("--> The specific  volume of {one} is {two:1.2f} N/m^3".format(one=(fluid.nameflu),two=fluid.prop()[1]))
     print("--> The dinamic   viscosity of {one} is {two:1.4e} Pa*s".format(one=fluid.nameflu,two=fluid.prop()[2]))
-    print("--> The kinematic viscosity of {one} is {two:1.4e} m^2/s\n".format(one=fluid.nameflu,two=fluid.prop()[3]))
+    print("--> The kinematic viscosity of {one} is {two:1.4e} m^2/s".format(one=fluid.nameflu,two=fluid.prop()[3]))
+    #Thermal 
+    print("--> The thermal diffusivity of {one} is {two:1.4e} m^2/s".format(one=fluid.nameflu,two=fluid.prop()[4]))
+    print("--> The Prandtl Number of {one} is {two:1.4e} m^2/s".format(one=fluid.nameflu,two=fluid.prop()[5]))
+    prn = fluid.prop()[5]
+    if prn > 1:
+        print("--> Prandtl Number > 1 ==> Velocity BL > Thermal BL")
+    else:
+        print("--> Prandtl Number < 1 ==> Velocity BL < Thermal BL")
     return fluid,regionName
 
 def geom(V0,fluid):
@@ -113,31 +208,60 @@ def geom(V0,fluid):
     ans = "None"
     while ans == "None":
         ans = int(input("    1. External Flow\n    2. Confined Flow\n* Set flow geometry [1-2]: "))
+
+        #### Free stream
         if ans == 1:
             FLK = "ext"
-            #### Free stream
             dc = float(input("* Set the lenght scale: "))
-
+            RE = V0 * (dc/fluid.prop()[3])
+            #Hansen(1928) approach
+            if RE < 3.2*10**5:
+                print("--> Laminar Regime")
+                d1 = 4.91
+                d2 = 1/2
+                delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
+                print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
+            elif RE >= 3.2*10**5:
+                print("--> Turbulent Regime")
+                d1 = 0.37
+                d2 = 1/5
+                delta = d1 * dc/(RE**d2) ##Boundary Layer Thickness
+                print("--> Boundary Layer Thickness: {:8.6f} m".format(delta))
+            ### delta is estimated
+            
+        #### Confined Flows
         elif ans == 2:
             FLK = "int"
-            #### Confined Flows
             ansS = int(input("    1. Circular Duct\n    2. Rectangular Duct\n    3. Unregular shape\n* Set the duct geometry [1-2-3]: "))
             ## case 1. Circular section
             if ansS == 1:
                 dc = float(input("* Set duct diameter (m): "))
                 L  = float(input("* Set the duct lenght (m): "))
-                if L < 10*dc:#extended range
-                    dc = L
-                    print("--> The boundary layer is not fully developed")
-                elif L >= 10*dc and L <= 60*dc: #extended range
-                    print("--> The confined flow in a transition regime")
-                    RE_0 = V0 * (dc/fluid.prop()[3])
-                    if RE_0 <= 3000:
-                        dc = L
+                RE_0 = V0 * (dc/fluid.prop()[3])
+                if RE_0 < 3000:
+                    Lh  = 0.05 * RE_0 * dc
+                    if L < Lh:
                         print("--> The boundary layer is not fully developed")
-                    elif RE_0 > 3000:
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                        
+                elif RE_0 > 3000 and RE_0 < 10000:
+                    Lh  = 4 * dc * RE_0**(1/6)
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
                         print("--> The boundary layer is developed")
 
+                elif RE_0 > 10000:
+                    Lh  = 40 * dc #Nikuradse
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                                        
             ## case 2. Rectangular section
             if ansS == 2:
                 sA = float(input("* Set the width (m): "))
@@ -147,16 +271,28 @@ def geom(V0,fluid):
                 dc = 4 * (Ar/Pr) #hydraulic diameter
                 L  = float(input("* Set the duct lenght (m): "))
                 #Check of the boundary layer development
-                if L < 10*dc: #extended range
-                    dc = L
-                    print("--> The boundary layer is not fully developed")
-                elif L >= 10*dc and L <= 60*dc: #extended range
-                    print("--> The confined flow in a transition regime")
-                    RE_0 = V0 * (dc/fluid.prop()[3])
-                    if RE_0 <= 3000:
-                        dc = L
+                if RE_0 < 3000:
+                    Lh  = 0.05 * RE_0 * dc
+                    if L < Lh:
                         print("--> The boundary layer is not fully developed")
-                    elif RE_0 > 3000:
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                        
+                elif RE_0 > 3000 and RE_0 < 10000:
+                    Lh  = 4 * dc * RE_0**(1/6)
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+
+                elif RE_0 > 10000:
+                    Lh  = 40 * dc #Nikuradse
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
                         print("--> The boundary layer is developed")
 
            ## case 3. Unregular shape
@@ -166,33 +302,45 @@ def geom(V0,fluid):
                 dc = 4 * (Ar/Pr) #hydraulic diameter
                 L  = float(input("* Set the duct lenght (m): "))
                 #Check of the boundary layer development
-                if L < 10*dc: #extended range
-                    dc = L
-                    print("--> The boundary layer is not fully developed")
-                elif L >= 10*dc and L <= 60*dc: #extended range
-                    print("--> The confined flow in a transition regime")
-                    RE_0 = V0 * (dc/fluid.prop()[3])
-                    if RE_0 <= 3000:
-                        dc = L
+                if RE_0 <= 2300:
+                    Lh  = 0.05 * RE_0 * dc #Kays and Crawford (1993) and Shah and Bhatti (1987)
+                    if L < Lh:
                         print("--> The boundary layer is not fully developed")
-                    elif RE_0 > 3000:
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+                        
+                elif RE_0 > 2300 and RE_0 < 10000:
+                    Lh  = 1.359 * dc * RE_0**(1/4) #Bhatti and Shah (1987) and Zhi-qing (1982)
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
                         print("--> The boundary layer is developed")
 
+                elif RE_0 > 10000:
+                    Lh  = 10 * dc 
+                    if L < Lh:
+                        print("--> The boundary layer is not fully developed")
+                        dc = L
+                    else:
+                        print("--> The boundary layer is developed")
+        
+            RE = V0 * (dc/fluid.prop()[3])
+            delta = dc/2
+            #delta will be updated once the wall shear stress is estimated
         else:
             ans = "None"
             print("... wrong selection!")
-
-    RE = V0 * (dc/fluid.prop()[3])
     print("\n--> The characteristic lenght scale is {:5.6f} m".format(dc) )
     print("--> The Reynolds number is {:1.5e}".format(RE))
-
-    return dc,RE,FLK
-
+    return dc,RE,FLK,delta
+    
 def meshH(Vo,ymin,ymax):
 	# Levels of refinement
      print("\n---------------- Mesh Design -----------------")
      CN = float(input("* Set the Courant Number (CNF <= 1) = "))
-     Lo = float(input("* Set the first level dimension (m) = "))
+     Lo = float(input("* Set the base mesh level dimension (m) = "))
      dt = Lo*CN / Vo
      print("--> The time discretization dt = {:1.3e} sec".format(dt))
      print("* Set the rate of refinement: ")
@@ -219,11 +367,10 @@ def meshH(Vo,ymin,ymax):
      ## Layering of the wall
      Nlrs = 0
      y1 = 999
-
      Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
      if Er<1.1: Er=1
      elif Er>1.5: Er=1.5
-     
+    
      while y1 > ymin:
         Nlrs = Nlrs + 1
         y1 = yref/((Er)**(Nlrs-1))
@@ -231,33 +378,30 @@ def meshH(Vo,ymin,ymax):
      print("--> Number of layers close to the wall: {}".format(Nlrs))
      print("--> The Relative size is {}".format(Rs))
      print("--> First cell size is {}".format(y1))
-
      print("\n---------------------------------------------")
      print("---------------------------------------------")
      return CN,Lo,dt,Lref,yref,y1,Er,Rs,Nlrs
 
-def calc(fluid,Name,V,Sv):
-
+def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class 
     Cnu = 0.09 #turbulence model constant
     print("\n---------------- Flow Velocity Field -----------------\n")
     V0 = float(input("* Set the free stream velocity [m/s]: "))
 
-    CL,Re,FLK = geom(V0,fluid) #Geometry function call
-
-    eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
-    eps = eps * 1e-3 # absolute wall roughness
-
+    CL,Re,FLK,delta = geom(V0,fluid) #Geometry function calling
+    
     if (FLK == "ext") :
-        if  (Re < 2.0*num.power(10.0,3.0)):
-            print(">>> Streamline Flow [Re < 2000]: Blausius Skin friction coefficient")
-            Cf = 1.328*num.power(Re,-0.5) #Skin-friction coefficient - laminar
-            print("--> Cf = 1.328*(Re)^-0.5 = {:4.5f}\n".format(Cf))
-        elif (Re < num.power(10.0,9.0)) and (Re > 2.0*num.power(10.0,3.0)):
+        if  (Re < num.power(10, 5)):
+            print(">>> Streamline Flow [Re < 100000]: Blausius Skin friction coefficient")
+            Cf = 0.664 * num.power(Re, -0.5) #Skin-friction coefficient - laminar
+            print("--> Cf = 0.664*(Re)^-0.5 = {:4.5f}\n".format(Cf))
+        elif (Re >= num.power(10, 5)):
             print(">>> Turbulent Flow [2000 < Re < 10^9]: Schlichting skin-friction coefficient")
-            Cf = num.power(((2.0*num.log10(Re))-0.65),-2.3)
+            Cf = num.power(((2 * num.log10(Re))-0.65), -2.3)
             print("--> Cf = (2*log10(Re)-0.65)^(-2.3) = {:4.5f}\n".format(Cf))
 
     if (FLK == "int") :
+        eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
+        eps = eps * 1e-3 # absolute wall roughness
         #Estimation of the friction factor by Colebrook-White formula
         print(">>> Colebrook-White friction coefficient")
         # Iterative procedure
@@ -288,26 +432,28 @@ def calc(fluid,Name,V,Sv):
     I = 0.16 * num.power(Re,(-1.0/8.0))   #Turbulent intensity (The common choice is I = 0.05)
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
     u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
-    l = 11.5 * (fluid.prop()[3]/Uw)          #Viscous BL thickness
-    wall_dist = 2*l     #Wall distance
 
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
-    if (FLK == "ext") :
-        tls = 0.4*l
-    if (FLK == "int") :
+    if (FLK == "ext"):
+        tls = 0.4*delta
+        #delta estimated in the geom function
+    if (FLK == "int"):
+        #delta estimated using the shear stress
+        delta = 11.6 * (fluid.prop()[3]/Uw) #Turbulent BL thickness
         tls = 0.038*CL
         
     print("\n>>> Turbulence free-stream boundary conditions")
     print("--> ymin = {:8.3e} m - wall minimun cell height".format(y_min))
     print("--> ymax = {:8.3e} m - wall maximum cell height".format(y_max))
-    print("--> d = {} m - Viscous BL thickness".format(l))
+    print("--> d = {} m - Viscous BL thickness".format(delta))
     print("--> tw = {:8.3e} Pa*m^-2 - Wall shear stress".format(tw))
     print("--> Uw = {:8.3e} m*s^-1 - Shear Velocity".format(Uw))
     print("--> I = {:4.4f} (-) - Turbulent intensity ".format(I))
     print("--> K = {:4.4f} m^2*s^-2 - Turbulent Kinetic Energy".format(K))
     print("--> u' = {:4.4f} m*s^-1 - Turbulent velocity fluctuation".format(u))
     print("\n>>> Epsilon and Omega - Turbulence dissipation")
+
     epsilon_min = Cnu*num.power(K,1.5)/tls # min turbulence dissipation
     epsilon_max = num.power(Cnu,(3.0/4.0))*num.power(K,1.5)/tls #max turbulence dissipation
     E = (epsilon_min + epsilon_max)/2     #averaged dissipation range
@@ -424,8 +570,7 @@ def calc(fluid,Name,V,Sv):
     data_BC.write("------------------- Turbulent characteristics --------------\n")
     data_BC.write("ymin = {:1.5e} m - First cell in boundary layer ymin \n".format(y_min))
     data_BC.write("ymax = {:1.5e} m - Last cell in boundary layer ymax \n".format(y_max))
-    data_BC.write("l = {:1.5e} m - Viscous BL thickness \n".format(l))
-    data_BC.write("wallDist = {:1.4e} m - Wall distance\n\n".format(wall_dist))
+    data_BC.write("l = {:1.5e} m - BL thickness \n".format(delta))
 
     data_BC.write("tw = {:5.5e} Pa*m^-2 - Wall shear stress\n".format(tw))
     data_BC.write("Uw = {:5.5f} m*s^-1 - Shear Velocity\n".format(Uw))
@@ -463,11 +608,13 @@ def calc(fluid,Name,V,Sv):
     data_BC.close()
 
     print("\n ... Estimation completed!\n ... Please find a report file in the code directory\n ... Enjoy your simulation!")
-###########################################################################################################
+####################################################################  END of Functions
 
-############################################################ Main
-F,Name = spec(V,Sv)  #fluid specification function
-a = calc(F,Name,V,Sv)    #Flow field and Turb. estimation function
+
+######################################################################## MAIN
+F,Name = spec(V,Sv)      #fluid specification function -  F is an object of the class physics
+calc(F,Name,V,Sv)    #Flow field and Turb. estimation function
+
 input("\n\n >>> Press a key to exit!")
-############################################################ END MAIN
+##################################################################### END MAIN
 
