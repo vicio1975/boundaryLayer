@@ -20,6 +20,7 @@ Changes: 1. Removed the moving results file (WIN users)
             Kc: thermal conductivity, (SI units: W/m-K)
             cp: specific heat, (SI units: J/kg-K)
             ρ : density, (SI units: kg/m3).
+            
             1. boundary layer improvemnt estimation
             
 @author: Vincenzo Sammartano
@@ -32,7 +33,7 @@ import numpy as num
 
 #### Version of the tool
 V = 5   #Main changes 
-Sv = 0  #small changes 
+Sv = 1  #small changes 
 ###################################################Classes declarations
 class physics:
     fluids = ['air','water']

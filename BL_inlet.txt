@@ -1,0 +1,73 @@
+###########################################################
+###########################################################
+#########                                         #########
+#########       BOUNDARY LAYER ESTIMATION         #########
+#########                                         #########
+#########         - Fluid Specifications          #########
+#########         - Flow Velocity Field           #########
+#########         - Turbulence characteristics    #########
+#########         - Mesh design                   #########
+#########                               ver.5.0   #########
+###########################################################
+###########################################################
+
+------------------------------------------------------------
+
+--------- Domain/SubDomain Name: inlet
+
+------------------------------------------------------------
+--------------------- Fluid Specifications -----------------
+Fluid = air 
+Temperature = 25.0 C 
+The density is  1.184 Kg/m^3 
+The specific volume is    11.61 N/m^3 
+The dinamic viscosity is 1.8373e-05 Pa*s 
+The kinematic viscosity is 1.5520e-05 m^2/s 
+------------------------------------------------------------
+
+------------------------------------------------------------
+------------------- Flow Velocity Field  -------------------
+Free stream velocity Vfree is 10.000 m/s 
+The characteristic lenght scale is 5.00000e-01 m 
+The Reynolds number is 3.22155870e+05  
+Skin-friction coefficient Cf is 4.6140415446e-03  
+------------------------------------------------------------
+
+------------------------------------------------------------
+------------------- Turbulent characteristics --------------
+ymin = 2.58505e-03 m - First cell in boundary layer ymin 
+ymax = 4.20070e-03 m - Last cell in boundary layer ymax 
+l = 1.46406e-02 m - BL thickness 
+tw = 2.73108e-01 Pa*m^-2 - Wall shear stress
+Uw = 0.48031 m*s^-1 - Shear Velocity
+u = 2.67649e-01 m*s^-1 - Turbulent velocity fluctuation
+lver = 4.14492e-03 m - Turbulent length scale
+
+I = 0.032780 - Turbulent intensity
+K = 1.61181e-01 m^2*s^-2 - Turbulent Kinetic Energy
+epsilon = 2.56530e+00 m^2*s^-3 - Turbulent Energy dissipation 
+omega = 1.76840e+02 s^-1 - Specific rate of dissipation 
+
+>>> Wall treatment: Wall Function
+nut = 1.078989e-03 Pa*s - Turbulent viscosity 
+nut/mi = 58.7259 - Viscosity ratio 
+epsilon_in = 1.506496e+01 m^2*s^-3 - Inlet Turbulent Energy dissipation 
+omega_in = 1.038510e+03 sec^-1 - Inlet specific rate of dissipation 
+Kwall = 1.611813e-01 m^2*s^-2 - Wall Turbulent Kinetic Energy 
+Omega_wall = 1.858051e+03 sec^-1 - Wall Specific rate of dissipation 
+nutWall = 1.026928e-04 Pa*s - Wall Turbulent viscosity 
+------------------------------------------------------------
+
+------------------------------------------------------------
+------------------------ Mesh Design  ----------------------
+CN   = 1.00 - Courant Number
+Lo   = 1.0000e-01 m - first level dimension
+dt   = 1.00000e-02 sec - time discretization
+Lref = 5 - Levels of refinement
+Yref = 2.585045e-03 m - Last cell height after refinement
+Y1   = 2.585045e-03 m - First cell over the wall with layers
+Er   = 1.1 - Espantion Ratio
+Rs   = 1.0000 - Relative Size
+Nlrs = 1 - Number of layers
+------------------------------------------------------------
+------------------------------------------------------------
