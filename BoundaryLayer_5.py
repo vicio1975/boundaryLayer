@@ -32,8 +32,8 @@ import numpy as num
 #import os
 
 #### Version of the tool
-V = 5   #Main changes 
-Sv = 1  #small changes 
+V = 5
+Sv = 1
 ###################################################Classes declarations
 class physics:
     fluids = ['air','water']
@@ -55,13 +55,13 @@ class physics:
             if self.nameflu == self.fluids[0]:
                 rot = self.pAtm/(self.Rf*t) #Density as function of temperature [Kg/mc]
                 gamma_t = rot * self.g  #specific weight at t°C
-				  #Sutherland Equation
+                  #Sutherland Equation
                 ba = 1.458*10**(-6) 
                 sa = 110.4 #costant in Kelvin
                 mi = ba * (t**1.5)/(t+sa) #Dinamic Viscosity  Pa s = kg m^-1 s^-1
                 ni = mi/rot         #Cinematic Viscosity  m2·s-1
                 
-				  #Thermal diffusivity, α = Kc/(ρ*cp)
+                  #Thermal diffusivity, α = Kc/(ρ*cp)
                 # -183 < T < 218 C
                 #Thermal conductivity
                 Kc = 5.75e-5 * ( 1 + 0.00317 * (self.T) - 0.0000021 * (self.T**2))
@@ -84,7 +84,7 @@ class physics:
                      +(46.17046*10**-6)*(self.T**3.0) + (105.56302*10**-9)*(self.T**4.0)-
                             +(280.54253*10**-12)*(self.T**5.0))/At
                 gamma_t = rot*self.g #specific weight at t°C
-				#Vogel Formula
+                #Vogel Formula
                 # 0<T<100 Celsius
                 c1 = -3.7188
                 c2 = 578.919
@@ -270,9 +270,9 @@ def geom(V0,fluid):
                         dc = L
                     else:
                         print("--> The boundary layer is developed")
-        
+            #ni = fluid.prop()[3]            
             RE = V0 * (dc/fluid.prop()[3])
-            delta = dc/2
+            delta = 5 * (fluid.prop()[3] * dc/V0)**0.5
             #delta will be updated once the wall shear stress is estimated
         else:
             ans = "None"
@@ -282,50 +282,49 @@ def geom(V0,fluid):
     return dc,RE,FLK,delta
     
 def meshH(Vo,ymin,ymax):
-	# Levels of refinement
-     print("\n---------------- Mesh Design -----------------")
-     CN = float(input("* Set the Courant Number (CNF <= 1) = "))
-     Lo = float(input("* Set the base mesh level dimension (m) = "))
-     dt = Lo*CN / Vo
-     print("--> The time discretization dt = {:1.3e} sec".format(dt))
-     print("* Set the rate of refinement: ")
-     lev = int(input("  1. High;\n  2. Medium;\n  3. Low;\n  [1-2-3]: "))
+    # Levels of refinement
+    print("\n---------------- Mesh Design -----------------")
+    CN = float(input("* Set the Courant Number (CNF <= 1) = "))
+    Lo = float(input("* Set the base mesh level dimension (m) = "))
+    dt = Lo*CN / Vo
+    print("--> The time discretization dt = {:1.3e} sec".format(dt))
+    print("* Set the rate of refinement: ")
+    lev = int(input("  1. High;\n  2. Medium;\n  3. Low;\n  [1-2-3]: "))
+    
+    if lev == 1:
+        yref = ymin
+        print("... refinement length yref = ymin = {}".format(yref))
+    elif lev == 3:
+        yref = ymax
+        print("... refinement length yref = ymax = {}".format(yref))
+    elif lev == 2:
+        yref = 0.5*(ymax+ymin)
+        print("... refinement length yref = (ymax+ymin)/2 = {}".format(yref))
+    else:
+        print("... wrong selection!")
+        print("... default refinement lenght = ymax")
+        yref = ymax
+        Lref = round((num.log2(Lo) - num.log2(yref)))
+    if (Lref < 0): Lref = 0
 
-     if lev == 1:
-          yref = ymin
-          print("... refinement length yref = ymin = {}".format(yref))
-     elif lev == 3:
-          yref = ymax
-          print("... refinement length yref = ymax = {}".format(yref))
-     elif lev == 2:
-          yref = 0.5*(ymax+ymin)
-          print("... refinement length yref = (ymax+ymin)/2 = {}".format(yref))
-     else:
-          print("... wrong selection!")
-          print("... default refinement lenght = ymax")
-          yref = ymax
-     Lref = round((num.log2(Lo) - num.log2(yref)))
-     if (Lref < 0): Lref = 0
-
-     print("--> The refinement level Lref = {}".format(int(Lref)))
+    print("--> The refinement level Lref = {}".format(int(Lref)))
 
      ## Layering of the wall
-     Nlrs = 0
-     y1 = 999
-     Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
-     if Er<1.1: Er=1
-     elif Er>1.5: Er=1.5
-    
-     while y1 > ymin:
+    Nlrs = 0
+    y1 = 999
+    Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
+    if Er<1.1: Er=1
+    elif Er>1.5: Er=1.5
+    while y1 > ymin:
         Nlrs = Nlrs + 1
         y1 = yref/((Er)**(Nlrs-1))
         Rs = y1/yref #relative size
-     print("--> Number of layers close to the wall: {}".format(Nlrs))
-     print("--> The Relative size is {}".format(Rs))
-     print("--> First cell size is {}".format(y1))
-     print("\n---------------------------------------------")
-     print("---------------------------------------------")
-     return CN,Lo,dt,Lref,yref,y1,Er,Rs,Nlrs
+    print("--> Number of layers close to the wall: {}".format(Nlrs))
+    print("--> The Relative size is {}".format(Rs))
+    print("--> First cell size is {}".format(y1))
+    print("\n---------------------------------------------")
+    print("---------------------------------------------")
+    return CN,Lo,dt,Lref,yref,y1,Er,Rs,Nlrs
 
 def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class 
     Cnu = 0.09 #turbulence model constant
@@ -335,17 +334,17 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     CL,Re,FLK,delta = geom(V0,fluid) #Geometry function calling
     
     if (FLK == "ext") :
-        if  Re < num.power(10, 5):
-            print(">>> Streamline Flow [Re < 100000]: Blausius Skin friction coefficient")
+        if  Re < 5 * num.power(10, 5):
+            print(">>> Streamline Flow [Re < 5*10^5]: Blausius Skin friction coefficient")
             Cf = 0.664 * num.power(Re, -0.5) #Skin-friction coefficient - laminar
             print("--> Cf = 0.664*(Re)^-0.5 = {:4.5f}\n".format(Cf))
-        elif (Re >= num.power(10, 5)):
-            print(">>> Turbulent Flow [2000 < Re < 10^9]: Schlichting skin-friction coefficient")
+        elif (Re >= 5 * num.power(10, 5)):
+            print(">>> Turbulent Flow [5x10^5 < Re < 10^9]: Schlichting skin-friction coefficient")
             Cf = num.power(((2 * num.log10(Re))-0.65), -2.3)
             print("--> Cf = (2*log10(Re)-0.65)^(-2.3) = {:4.5f}\n".format(Cf))
 
     if FLK == "int":
-        eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe	[0.045 - 0.09]\n   - New cast iron	[0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
+        eps  = float(input("* Set the wall absolute roughness (mm):\n   - Stainless steel [0.0015]\n   - Steel commercial pipe    [0.045 - 0.09]\n   - New cast iron    [0.25 - 0.8]\n   - PVC and Plastic [0.0015 - 0.007]\n   ... Select a value : "))
         eps = eps * 1e-3 # absolute wall roughness
         #Estimation of the friction factor by Colebrook-White formula
         print(">>> Colebrook-White friction coefficient")
@@ -383,17 +382,24 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     if FLK == "ext":
         tls = 0.4*delta
         #delta estimated in the geom function
+        #Thermal boundary layer Thickness
         if Re <= 5*10**5:
             delta_t = delta * (fluid.prop()[5])**(1/3) 
             print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
         elif Re > 5*10**5:
-           delta_t = delta
-           print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
-    ##Da salvare sul file!
-    ##Da qui!!!!        
+            delta_t = delta
+            print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
+
     elif FLK == "int":
         #delta estimated using the shear stress
         delta = 11.6 * (fluid.prop()[3]/Uw) #Turbulent BL thickness
+        #Thermal boundary layer Thickness
+        if Re <= 5*10**5:
+            delta_t = delta * (fluid.prop()[5])**(1/3) 
+            print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
+        elif Re > 5*10**5:
+            delta_t = delta
+            print("--> The Thermal BL height is deltaT = {} m".format(delta_t))
         tls = 0.038*CL
         
     print("\n>>> Turbulence free-stream boundary conditions")
@@ -444,7 +450,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     while WT:
         WT = int(input("* Set the wall treatment [1,2,3]: "))
         if WT == 1:
-            k_wall = K;
+            k_wall = K
             omega_wall = 10.0 * (6.0*fluid.prop()[3])/(0.075 * num.power(y_min,2))
             nutw = fluid.prop()[0]*k_wall/omega_wall
             print("\n>>> Wall Function treatment ")
@@ -455,8 +461,8 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
             WT = False
         elif WT == 2:
             k_wall = 0
-            omega_wall_lR = 10*(6.0*fluid.prop()[3])/(0.075*num.power(y_min,2.0));
-            omega_wall_log = num.power(K,0.5)/num.power(Cnu,1/4)/0.4/y_min;
+            omega_wall_lR = 10*(6.0*fluid.prop()[3])/(0.075*num.power(y_min,2.0))
+            omega_wall_log = num.power(K,0.5)/num.power(Cnu,1/4)/0.4/y_min
             omega_wall = num.power((num.power(omega_wall_lR,2)+num.power(omega_wall_log,2)),0.5)
             nutw = fluid.prop()[0]*k_wall/omega_wall
             print("\n>>> Scalable Wall Function treatment")
@@ -525,7 +531,8 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     data_BC.write("------------------- Turbulent characteristics --------------\n")
     data_BC.write("ymin = {:1.5e} m - First cell in boundary layer ymin \n".format(y_min))
     data_BC.write("ymax = {:1.5e} m - Last cell in boundary layer ymax \n".format(y_max))
-    data_BC.write("delta = {:1.5e} m - BL thickness \n".format(delta))
+    data_BC.write("delta = {:1.5e} m - Velocity BL thickness \n".format(delta))
+    data_BC.write("deltaT = {:1.5e} m - Thermal BL thickness \n".format(delta_t))
 
     data_BC.write("tw = {:5.5e} Pa*m^-2 - Wall shear stress\n".format(tw))
     data_BC.write("Uw = {:5.5f} m*s^-1 - Shear Velocity\n".format(Uw))
