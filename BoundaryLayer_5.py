@@ -215,6 +215,7 @@ def geom(V0,fluid):
                 Pr = 2 * (sA + sB) # perimeter of the section
                 dc = 4 * (Ar/Pr) #hydraulic diameter
                 L  = float(input("* Set the duct lenght (m): "))
+                RE_0 = V0 * (dc/fluid.prop()[3])
                 #Check of the boundary layer development
                 if RE_0 < 3000:
                     Lh  = 0.05 * RE_0 * dc
@@ -246,6 +247,8 @@ def geom(V0,fluid):
                 Pr = float(input("* Set the perimeter (m): "))
                 dc = 4 * (Ar/Pr) #hydraulic diameter
                 L  = float(input("* Set the duct lenght (m): "))
+                RE_0 = V0 * (dc/fluid.prop()[3])
+   
                 #Check of the boundary layer development
                 if RE_0 <= 2300:
                     Lh  = 0.05 * RE_0 * dc #Kays and Crawford (1993) and Shah and Bhatti (1987)
