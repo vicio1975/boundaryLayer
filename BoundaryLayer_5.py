@@ -307,8 +307,8 @@ def meshH(Vo,ymin,ymax):
         print("... wrong selection!")
         print("... default refinement lenght = ymax")
         yref = ymax
-        Lref = round((num.log2(Lo) - num.log2(yref)))
-        if (Lref < 0): Lref = 0
+    Lref = round((num.log2(Lo) - num.log2(yref)))
+    if (Lref < 0): Lref = 0
 
     print("--> The refinement level Lref = {}".format(int(Lref)))
 
@@ -316,6 +316,7 @@ def meshH(Vo,ymin,ymax):
     Nlrs = 0
     y1 = 999
     Er = float(input(" * Set the espansion ratio Er: [1.1-1.5] "))
+    #limit the espantion ratio
     if Er<1.1: Er=1
     elif Er>1.5: Er=1.5
     while y1 > ymin:
