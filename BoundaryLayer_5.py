@@ -308,7 +308,7 @@ def meshH(Vo,ymin,ymax):
         print("... default refinement lenght = ymax")
         yref = ymax
         Lref = round((num.log2(Lo) - num.log2(yref)))
-    if (Lref < 0): Lref = 0
+        if (Lref < 0): Lref = 0
 
     print("--> The refinement level Lref = {}".format(int(Lref)))
 
