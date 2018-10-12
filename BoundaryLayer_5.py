@@ -21,7 +21,8 @@ Changes: 1. Removed the moving results file (WIN users)
             cp: specific heat, (SI units: J/kg-K)
             ρ : density, (SI units: kg/m3).
             
-            1. boundary layer improvemnt estimation
+            1. boundary layer improvemnt estimation;
+            2. saving the selected y+ value; 
             
 @author: Vincenzo Sammartano
 email: v.sammartano@gmail.com
@@ -33,7 +34,8 @@ import numpy as num
 
 #### Version of the tool
 V = 5
-Sv = 1
+Sv = 2
+
 ###################################################Classes declarations
 class physics:
     fluids = ['air','water']
@@ -563,6 +565,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     data_BC.write("CN   = {:1.2f} - Courant Number\n".format(CN))
     data_BC.write("Lo   = {:5.4e} m - first level dimension\n".format(Lo))
     data_BC.write("dt   = {:1.5e} sec - time discretization\n".format(dt))
+    data_BC.write("Y+   = {:5.0f} - Selected value of y+\n".format(yplus_min))
     data_BC.write("Lref = {} - Levels of refinement\n".format(int(Lref)))
     data_BC.write("Yref = {:5.6e} m - Last cell height after refinement\n".format(yref))
     data_BC.write("Y1   = {:5.6e} m - First cell over the wall with layers\n".format(y1))
