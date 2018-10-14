@@ -16,17 +16,15 @@ The code write the results on a text file.
 
 ~~~~
 
-Termal boundary layer implementation (work in progress):
+Termal boundary layer implementation:
 	Prandtl Number = kinematic_viscosity/thermal_diffusivity = [mi/ro] / [Kc/(ro*cp)] = 
-     Prandtl Number = (mi*cp)/Kc 
-     ni : momentum diffusivity (kinematic viscosity), ni = mi/ro (SI units: m2/s)
-     alfa : thermal diffusivity, alfa = Kc/(ro*cp) (SI units: m2/s)
-     mi : dynamic viscosity, (SI units: Pa s = N s/m2)
-     Kc: thermal conductivity, (SI units: W/m-K)
-     cp: specific heat, (SI units: J/kg-K)
-     ro : density, (SI units: kg/m3).
-
-
+	Prandtl Number = (mi*cp)/Kc 
+	ni : momentum diffusivity (kinematic viscosity), ni = mi/ro (SI units: m2/s)
+	alfa : thermal diffusivity, alfa = Kc/(ro*cp) (SI units: m2/s)
+	mi : dynamic viscosity, (SI units: Pa s = N s/m2)
+	Kc: thermal conductivity, (SI units: W/m-K)
+	cp: specific heat, (SI units: J/kg-K)
+	ro : density, (SI units: kg/m3).
 
 Bibliography
 
@@ -41,7 +39,7 @@ Bibliography
 - About Thermal Conductivity
 Title: The Temperature Dependence of the Thermal Conductivity of Air
 Authors: Kannuluik, W. G. & Carman, E. H.
-Journal: Australian Journal of Scientific Research, Series A: Physical Sciences, vol. 4, p.305          
+Journal: Australian Journal of Scientific Research, Series A: Physical Sciences, vol. 4, p.305
 
 - Heat Capacity at constant volume
 https://www.grc.nasa.gov/www/k-12/airplane/specheat.html
@@ -49,4 +47,5 @@ http://thermopedia.com/content/553/
 The values up to 1000 K were originally published in "Tables of Thermal Properties of Gases", NBS Circular 564,1955.
 The last five rows were calculated from a formula by B G Kyle "Chemical and Process Thermodynamics", Englewood Cliffs / Prentice Hall, 1984, and have <1% error.
 
-- 2006 ASHRAE Handbook—Refrigeration (SI) - Table 2 - Thermal Property Models for Water and Ice (?40 ? t ? 150°C) - Choi and Okos (1986)
+- 2006 ASHRAE Handbook Refrigeration (SI) - Table 2 - Thermal Property Models for Water and Ice (t range: 40 < t < 150°C) - Choi and Okos (1986)
+
