@@ -193,7 +193,7 @@ def geom(V0,fluid):
                     else:
                         print("--> The boundary layer is developed")
                         
-                elif RE_0 > 3000 and RE_0 < 10000:
+                elif RE_0 > 3000 and RE_0 <= 10000:
                     Lh  = 4 * dc * RE_0**(1/6)
                     if L < Lh:
                         print("--> The boundary layer is not fully developed")
@@ -202,7 +202,12 @@ def geom(V0,fluid):
                         print("--> The boundary layer is developed")
 
                 elif RE_0 > 10000:
-                    Lh  = 40 * dc #Nikuradse
+                    Lh  = 10 * dc #Nikuradse
+                    #Cimbala, Yungas A.Çengel, John M. (2006).
+                    #Fluid mechanics : fundamentals and applications (1st ed.).
+                    #Boston: McGraw-Hill 
+                    #Lh  = 40 * dc #Nikuradse
+                    #Lh  = 100 * dc #High Reynolds values
                     if L < Lh:
                         print("--> The boundary layer is not fully developed")
                         dc = L
@@ -227,7 +232,7 @@ def geom(V0,fluid):
                     else:
                         print("--> The boundary layer is developed")
                         
-                elif RE_0 > 3000 and RE_0 < 10000:
+                elif RE_0 > 3000 and RE_0 <= 10000:
                     Lh  = 4 * dc * RE_0**(1/6)
                     if L < Lh:
                         print("--> The boundary layer is not fully developed")
@@ -236,7 +241,13 @@ def geom(V0,fluid):
                         print("--> The boundary layer is developed")
 
                 elif RE_0 > 10000:
-                    Lh  = 40 * dc #Nikuradse
+                    Lh  = 10 * dc #Nikuradse
+                    #Cimbala, Yungas A.Çengel, John M. (2006).
+                    #Fluid mechanics : fundamentals and applications (1st ed.).
+                    #Boston: McGraw-Hill 
+                    #Lh  = 40 * dc #Nikuradse
+                    #Lh  = 100 * dc #High Reynolds values
+
                     if L < Lh:
                         print("--> The boundary layer is not fully developed")
                         dc = L
@@ -260,7 +271,7 @@ def geom(V0,fluid):
                     else:
                         print("--> The boundary layer is developed")
                         
-                elif RE_0 > 2300 and RE_0 < 10000:
+                elif RE_0 > 2300 and RE_0 <= 10000:
                     Lh  = 1.359 * dc * RE_0**(1/4) #Bhatti and Shah (1987) and Zhi-qing (1982)
                     if L < Lh:
                         print("--> The boundary layer is not fully developed")
@@ -275,8 +286,8 @@ def geom(V0,fluid):
                         dc = L
                     else:
                         print("--> The boundary layer is developed")
-            #ni = fluid.prop()[3]            
-            RE = V0 * (dc/fluid.prop()[3])
+                  
+            RE = V0 * (dc/fluid.prop()[3]) #ni = fluid.prop()[3]      
             delta = 5 * (fluid.prop()[3] * dc/V0)**0.5
             #delta will be updated once the wall shear stress is estimated
         else:
