@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 """
 Created on 13/05/2015
-Updated on 16/08/2018
+Updated on 02/02/2019
 
 Changes: 1. Removed the moving results file (WIN users)
          2. Added the selection of geometry duct, three geometries kind
@@ -154,7 +154,7 @@ def geom(V0,fluid):
     print("* Flow geometry conditions:")
     ans = "None"
     while ans == "None":
-        ans = int(input("    1. External Flow\n    2. Confined Flow\n* Set flow geometry [1-2]: "))
+        ans = int(input("    1. External Flow\n    2. Internal Flow\n* Set flow geometry [1-2]: "))
 
         #### Free stream
         if ans == 1:
