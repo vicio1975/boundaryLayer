@@ -7,11 +7,12 @@ Here the main steps:
 - Turbulence characteristics
 - Mesh design 
 
-{*} Once the kind of flow and the temperature are defined, the flow characteristics are estimated: density, dynamic and kinematic viscosity (Sutherland formula for air dynamic viscosity, Kell formula for water density and Vogel equation for water dynamic density). 
+Here some steps detail:
+a) Once the kind of flow and the temperature are defined, the flow characteristics are estimated: density, dynamic and kinematic viscosity (Sutherland formula for air dynamic viscosity, Kell formula for water density and Vogel equation for water dynamic density). 
 The free stream velocity and the geometry settings (internal or external flow, type of geometry and/or the characteristic length of the flow-Dc) allow to estimate the number of Reynolds (V*Dc/ni).
-{**} The function "calc" estimates the skin friction factor dependending on the Reynolds number and the kind of flow (external or internal flow): the Blausius formula is used for laminar flow and Schlichting for turbulent flows; for internal flows the Colebrook-White formula is used for all flow regimes. The Shear stress and the shear velocity are estimated using the skin friction factor.
-{***} The shear stress and shear velocity allow to estimate the Turbulence free-stream boundary conditions, such as: Viscous BL thickness, Turbulent intensity, Turbulent Kinetic Energy, Turbulent velocity fluctuation, Epsilon and Omega - Turbulence dissipation and dissipation frequency, turbulence viscosity and the viscosity ratio. 
-{****} A Mesh design is proposed according to the selected wall treatment (wall function, scalable wall function and fully resolved wall).
+b) The function "calc" estimates the skin friction factor dependending on the Reynolds number and the kind of flow (external or internal flow): the Blausius formula is used for laminar flow and Schlichting for turbulent flows; for internal flows the Colebrook-White formula is used for all flow regimes. The Shear stress and the shear velocity are estimated using the skin friction factor.
+c) The shear stress and shear velocity allow to estimate the Turbulence free-stream boundary conditions, such as: Viscous BL thickness, Turbulent intensity, Turbulent Kinetic Energy, Turbulent velocity fluctuation, Epsilon and Omega - Turbulence dissipation and dissipation frequency, turbulence viscosity and the viscosity ratio. 
+d) A Mesh design is proposed according to the selected wall treatment (wall function, scalable wall function and fully resolved wall).
 
 The code writes the results on a text file.
 
