@@ -29,6 +29,7 @@ email: v.sammartano@gmail.com
 """
 
 import numpy as num
+import tkinter 
 #from shutil import move
 #import os
 
