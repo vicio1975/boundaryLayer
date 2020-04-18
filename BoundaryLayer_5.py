@@ -393,7 +393,7 @@ def calc(fluid,Name,V,Sv): #fluid is an object of the fluid class
     y_max = (yplus_max*fluid.prop()[3])/Uw
     I = 0.16 * num.power(Re,(-1.0/8.0))   #Turbulent intensity (The common choice is I = 0.05)
     K = (3.0/2.0) * num.power((I*V0),2.0) #Turbulent kinetic energy
-    u = (2.0/3.0) * num.power(K,0.5)         #Turbulent fluctuation
+    u = (2*K/3)^0.5         #Turbulent fluctuation
 
     #turbulent scale estimation
     #large energy-containing eddies in a turbulent flow.
