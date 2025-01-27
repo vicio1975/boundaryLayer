@@ -11,13 +11,13 @@ import math
 
 # Functions
 
-def print_results(x, y):
+def print_results(x, y,z,w):
     """
     This function prints results on the output frame
     - x is the reynolds number
     - y is the BL thickness
     """
-    result_text = "Reynolds number (-) = {:4.0f} \n\n       BL thickness (m) = {:2.5f}".format(x, y)
+    result_text = "Reynolds number (-) = {:4.0f} \n\nBL thickness (mm) = {:2.2f}\n\nFirst cell height (mm) = {:2.2f}\n\nCells numbers = {:2.0f}".format(x, y,z,w)
     # this deletes the current text
     results_values.delete('1.0', tk.END)
     # this updates the results
@@ -74,7 +74,7 @@ def BL(velocity, length_mm, kinematic_viscosity, flow_type):
     """
     length_m = length_mm / 1000.0  # Convert length to meters
     reynolds_number = (velocity * length_m) / kinematic_viscosity
-
+    
     if flow_type == 1:  # Free-stream boundary layer
         if reynolds_number < 3e5:  # Laminar flow
             delta = length_m * ((0.375 / (reynolds_number ** 0.5)) ** (3 / 4))
@@ -105,7 +105,9 @@ def calculation():
         velocity = float(v1.get())
         length = float(ls1.get())
         flow_boundary = modForm.get()
-
+        yplus = int(yplus1.get())
+        layer_ratio = float(layer_ratio1.get())
+        
         if flow_boundary not in [1, 2]:
             raise ValueError("Flow type must be 1 (free stream) or 2 (confined flow).")
 
@@ -120,8 +122,30 @@ def calculation():
         # Calculate boundary layer thickness
         bl_thickness, reynolds_number = BL(velocity, length, ni_t, flow_boundary)
 
+        #Mesh cell size over walls
+        #friction factor
+        Cf = 0.058*reynolds_number**-0.2
+        #wall shear stress
+        t_star = 0.5 * density_t * velocity**2 * Cf
+        #shear velocity
+        u_star = (t_star/density_t)**0.5
+        #minimum distance from wall y+  = u_star * y / ni
+        y = (yplus/u_star)*ni_t
+        #Number of layers needed
+        Nl = bl_thickness/y
+        #layer ratio
+        ytot = y
+        layers = 1
+
+        while ytot<=bl_thickness:
+            layers = layers + 1
+            ytot = ytot*(layer_ratio +1)
+            
+        #bl_thickness and y in mm
+        bl_thickness = bl_thickness*1000
+        y = y *1000
         # Display results
-        print_results(reynolds_number, bl_thickness)
+        print_results(reynolds_number, bl_thickness, y, layers)
 
     except ValueError as e:
         messagebox.showerror("Input Error", str(e))
@@ -141,7 +165,8 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("Boundary Layer Thickness Calculator")
     root.geometry("400x500")
-
+    root.resizable(width=False, height=False)
+    
     flu_opt = ["Air", "Water"]
     modForm = tk.IntVar()
 
@@ -151,8 +176,8 @@ if __name__ == "__main__":
     fr2 = tk.LabelFrame(root, text="Results")
     fr2.pack(fill="both", padx=10, pady=10)
 
-    tk.Label(fr1, text="Fluid:").grid(row=0, column=0, padx=10, pady=5)
-    flu_set = ttk.Combobox(fr1, values=flu_opt)
+    tk.Label(fr1, text="Fluid:").grid(row=0, column=0, padx=10, pady=4)
+    flu_set = ttk.Combobox(fr1, values=flu_opt,width=10)
     flu_set.set("Air")
     flu_set.grid(row=0, column=1, padx=10)
 
@@ -171,21 +196,31 @@ if __name__ == "__main__":
     ls1.insert(0, "100.0")
     ls1.grid(row=3, column=1, padx=10)
 
+    tk.Label(fr1, text="y+ (-):").grid(row=4, column=0, padx=10, pady=5)
+    yplus1 = tk.Entry(fr1)
+    yplus1.insert(0, "1")
+    yplus1.grid(row=4, column=1, padx=10)
+
+    tk.Label(fr1, text="layer ratio:").grid(row=5, column=0, padx=10, pady=5)
+    layer_ratio1 = tk.Entry(fr1)
+    layer_ratio1.insert(0, "1.2")
+    layer_ratio1.grid(row=5, column=1, padx=10)
+    
     for1 = tk.Radiobutton(fr1, text="Free Stream", variable=modForm, value=1, 
                           command=lambda: ACTF(for1, for2))
-    for1.grid(row=4, column=0, pady=5)
+    for1.grid(row=6, column=0, pady=5)
 
     for2 = tk.Radiobutton(fr1, text="Confined Flow", variable=modForm, value=2, 
                           command=lambda: ACTF(for1, for2))
-    for2.grid(row=4, column=1, pady=5)
+    for2.grid(row=6, column=1, pady=5)
 
-    results_values = tk.Text(fr2, height=5)
+    results_values = tk.Text(fr2, height=7)
     results_values.pack(padx=10, pady=10)
 
     btn_calculate = tk.Button(root, text="Calculate", command=calculation)
-    btn_calculate.pack(pady=5)
+    btn_calculate.pack(pady=2)
 
     btn_exit = tk.Button(root, text="Exit", command=ex)
-    btn_exit.pack(pady=5)
+    btn_exit.pack(pady=2)
 
     root.mainloop()
